@@ -6,7 +6,6 @@ function App() {
 
   return (
     <>
-      <div>Welcome to Notion By Uday Thakare</div>
 
       <Routes>
         <Route path='/' element={<HomePage />} />
