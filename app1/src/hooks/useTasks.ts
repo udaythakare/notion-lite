@@ -1,4 +1,4 @@
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import type { Task } from "../types/task";
 const STORAGE_KEY = "userTasks";
 import { v4 as uuidv4 } from "uuid";
@@ -12,6 +12,18 @@ export const useTasks = () => {
     const [isPending, startTransition] = useTransition();
     const [isSaving, setIsSaving] = useState(false);
 
+    // focusing on input field while editing
+    const inputRef = useRef<HTMLInputElement>(null);
+    const isSubmittingRef = useRef(false);
+    const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const prevTaskCountRef = useRef<number>(0);
+
+    useEffect(() => {
+        if (editingTaskId) {
+            inputRef.current?.focus();
+        }
+    }, [editingTaskId])
+
 
     // Load Tasks
     useEffect(() => {
@@ -23,6 +35,27 @@ export const useTasks = () => {
         }
     }, [])
 
+    useEffect(() => {
+        return () => {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+            }
+        }
+    }, [])
+
+
+    useEffect(() => {
+        if (allTasks.length > prevTaskCountRef.current) {
+            console.log("Task added")
+        }
+
+        if (allTasks.length < prevTaskCountRef.current) {
+            console.log("Task deleted")
+        }
+
+        prevTaskCountRef.current = allTasks.length;
+    }, [allTasks])
+
 
 
     // Save Task to Storage
@@ -31,10 +64,15 @@ export const useTasks = () => {
 
         setIsSaving(true);
 
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+        }
+
         startTransition(() => {
-            setTimeout(() => {
+            timeoutRef.current = setTimeout(() => {
                 setAllTasks(tasks);
                 setIsSaving(false);
+                isSubmittingRef.current = false;
             }, 800)
         })
 
@@ -43,6 +81,9 @@ export const useTasks = () => {
 
     const addOrUpdateTask = () => {
         if (!task.trim()) return;
+        if (isSubmittingRef.current) return;
+
+        isSubmittingRef.current = true;
 
 
         const stored = localStorage.getItem(STORAGE_KEY);
@@ -110,7 +151,10 @@ export const useTasks = () => {
         //actions
         addOrUpdateTask,
         deleteTask,
-        editTask
+        editTask,
+
+        //ref
+        inputRef
     }
 
 

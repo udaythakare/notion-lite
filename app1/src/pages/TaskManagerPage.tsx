@@ -15,8 +15,12 @@ const TaskManagerPage = () => {
         setStatus,
         addOrUpdateTask,
         deleteTask,
-        editTask
+        editTask,
+        inputRef
     } = useTasks();
+
+
+
 
     return (
         <div className="min-h-screen bg-gray-100 p-6">
@@ -29,6 +33,7 @@ const TaskManagerPage = () => {
                     </h1>
 
                     <input
+                        ref={inputRef}
                         type="text"
                         placeholder="Enter your task"
                         value={task}
