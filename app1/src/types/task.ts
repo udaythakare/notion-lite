@@ -4,3 +4,10 @@ export type Task = {
     priority: string
     status: string
 }
+
+
+export type TaskInput = {
+    task: string;
+    priority: string;
+    status: string;
+};
